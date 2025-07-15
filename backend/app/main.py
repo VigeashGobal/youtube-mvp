@@ -16,16 +16,23 @@ from .public_analysis import get_channel_report
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Creator Funding API")
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="public"), name="static")
+# Mount static files - adjust path for Vercel
+static_dir = "public" if os.path.exists("public") else "../public"
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# Templates
-templates = Jinja2Templates(directory="public")
+# Templates - adjust path for Vercel
+templates_dir = "public" if os.path.exists("public") else "../public"
+templates = Jinja2Templates(directory=templates_dir)
 
 @app.get("/")
 def dashboard(request: FastAPIRequest):
     """Main dashboard page"""
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/test")
+def test_endpoint():
+    """Test endpoint for Vercel debugging"""
+    return {"message": "API is working!", "status": "success"}
 
 @app.get("/login")
 def login():
