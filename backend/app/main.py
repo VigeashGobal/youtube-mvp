@@ -34,6 +34,16 @@ def test_endpoint():
     """Test endpoint for Vercel debugging"""
     return {"message": "API is working!", "status": "success"}
 
+@app.get("/health")
+def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "openai_configured": bool(os.getenv("OPENAI_API_KEY")),
+        "youtube_configured": bool(os.getenv("YOUTUBE_API_KEY")),
+        "database_configured": bool(os.getenv("DATABASE_URL"))
+    }
+
 @app.get("/login")
 def login():
     flow = get_flow()

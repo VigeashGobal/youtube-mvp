@@ -5,12 +5,17 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 API_KEY = os.getenv("YOUTUBE_API_KEY")
-if not API_KEY:
-    raise EnvironmentError("Add YOUTUBE_API_KEY to your .env")
 
-yt = build("youtube", "v3", developerKey=API_KEY)
+# Initialize YouTube API client if key is available
+if API_KEY:
+    yt = build("youtube", "v3", developerKey=API_KEY)
+else:
+    yt = None
 
 def _search_channel(q: str) -> str | None:
+    if not yt:
+        raise EnvironmentError("YouTube API key not configured. Please add YOUTUBE_API_KEY to your environment variables.")
+    
     resp = yt.search().list(part="snippet", q=q, type="channel", maxResults=1).execute()
     if resp["items"]:
         return resp["items"][0]["snippet"]["channelId"]
@@ -18,6 +23,9 @@ def _search_channel(q: str) -> str | None:
 
 def resolve_channel_id(text: str) -> str:
     """Accepts URL, @handle, or plain name – returns UC-id."""
+    if not yt:
+        raise EnvironmentError("YouTube API key not configured. Please add YOUTUBE_API_KEY to your environment variables.")
+    
     text = text.strip()
     # 1) UC…
     m = re.search(r"(UC[0-9A-Za-z_-]{22})", text)
@@ -35,6 +43,9 @@ def resolve_channel_id(text: str) -> str:
 
 def fetch_public_metrics(channel_id: str, days: int = 30) -> Dict[str, int]:
     """Returns subs, total views, video count, recent views."""
+    if not yt:
+        raise EnvironmentError("YouTube API key not configured. Please add YOUTUBE_API_KEY to your environment variables.")
+    
     c = yt.channels().list(id=channel_id, part="statistics,contentDetails").execute()
     if not c["items"]:
         raise ValueError("Channel not found.")
