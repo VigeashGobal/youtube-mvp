@@ -5,7 +5,8 @@ fastapi
 uvicorn[standard]
 pandas
 sqlalchemy
-python-dotenv google-auth-oauthlib
+python-dotenv
+google-auth-oauthlib
 apscheduler
 jinja2
 numpy
